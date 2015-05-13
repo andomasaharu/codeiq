@@ -1,0 +1,48 @@
+【解答】
+"P = 63088012960224"
+"Q = 120739"
+"R = 72834276"
+【言語】
+Haskell
+【コード】
+ff :: Integer -> Integer
+ff 0 = 3
+ff 1 = 0
+ff 2 = 2
+ff n = rec 3 (ff 2) (ff 1) (ff 0)
+  where rec i a0 a1 a2 | i == n = a1 + a2
+                       | otherwise = rec (i + 1) (a2 + a1) a0 a1
+f = last $ take 30 [ff x | x <- [2..], (mod (ff x) x) == 0]
+
+g :: Integer -> Integer
+g n = rec n 2
+  where rec 1 i = i
+        rec n i | (mod n i) == 0 = rec (div n i) i
+                | otherwise = rec n (i+1)
+
+primelimit :: Integer -> Integer
+primelimit n = truncate (sqrt (fromIntegral n))
+
+primes :: Integer -> [Integer]
+primes n = [x | x <- [2..n], all (\y -> (mod x y) /= 0) [2..(primelimit x)]]
+
+primeswith n = zip (primes n) [1..]
+
+primep :: Integer -> [Integer] -> Bool
+primep n primes = rec primes
+  where rec [] = False
+        rec (x:xs) | x > n = False
+                   | x == n = True
+                   | otherwise = rec xs
+h n = sum $ map (\(a,b) -> a) $ filter (\(a,b) -> primep b ps) (primeswith n)
+  where ps = primes n
+
+main :: IO ()
+main = do
+       putStrLn $ show $ answerformatter "P" fanswer
+       putStrLn $ show $ answerformatter "Q" ganswer
+       putStrLn $ show $ answerformatter "R" hanswer
+  where fanswer = f
+        ganswer = g fanswer
+        hanswer = h ganswer
+        answerformatter s n = s ++ " = " ++ (show n)
